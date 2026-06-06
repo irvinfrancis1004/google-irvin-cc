@@ -1,0 +1,10 @@
+# Datos sensibles — NO subir
+data.js
+config.js
+
+# Archivos de respaldo / copias
+*copia*
+*- copia*
+
+# Carpeta de configuración local de Claude
+.claude/
