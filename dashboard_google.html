@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard Google Ads — Equilibrio Total</title>
 <script src="data.js"></script>
-<script src="config.js"></script>
 <script src="chart.min.js"></script>
 <style>
 :root{
@@ -17,24 +16,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* ── LOGIN ── */
-#loginWrap{position:fixed;inset:0;z-index:999;background:linear-gradient(135deg,#0a1628 0%,#1e3a8a 50%,#1e40af 100%);display:flex;align-items:center;justify-content:center}
-.login-box{background:#fff;border-radius:16px;padding:40px 40px 36px;width:360px;box-shadow:0 24px 64px rgba(0,0,0,.45)}
-.login-logo{text-align:center;margin-bottom:28px}
-.login-logo .ico{font-size:42px;display:block;margin-bottom:10px}
-.login-logo h2{font-size:20px;font-weight:800;color:#0f172a;letter-spacing:-.3px}
-.login-logo p{font-size:12px;color:var(--muted);margin-top:4px}
-.login-field{margin-bottom:16px}
-.login-field label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.login-field input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s}
-.login-field input:focus{border-color:#3b82f6}
-.login-err{display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:8px 12px;font-size:12px;color:#991b1b;margin-bottom:14px;text-align:center}
-.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
-.login-btn:hover{opacity:.9}
-.login-footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px}
-.pw-wrap{position:relative}
-.pw-wrap input{padding-right:40px}
-.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:0}
 
 /* ── HEADER ── */
 .hdr{background:linear-gradient(135deg,#0f2044 0%,#1e40af 60%,#2563eb 100%);color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 16px rgba(0,0,0,.25);flex-wrap:wrap;gap:12px}
@@ -203,7 +184,6 @@ tr:last-child td{border-bottom:none}
 .empty p{font-size:14px;margin-bottom:6px}
 .empty code{background:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:13px;color:#1e40af}
 
-#appWrap{display:none}
 
 @media(max-width:900px){.charts-grid{grid-template-columns:1fr}}
 @media(max-width:768px){
@@ -217,30 +197,6 @@ tr:last-child td{border-bottom:none}
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginWrap">
-  <div class="login-box">
-    <div class="login-logo">
-      <span class="ico">&#127973;</span>
-      <h2>Equilibrio Total</h2>
-      <p>Dashboard Google Ads &mdash; Acceso restringido</p>
-    </div>
-    <div class="login-err" id="loginErr">Usuario o contrase&ntilde;a incorrectos</div>
-    <div class="login-field">
-      <label>Usuario</label>
-      <input type="text" id="loginUser" placeholder="Ingresa tu usuario" autocomplete="username" />
-    </div>
-    <div class="login-field">
-      <label>Contrase&ntilde;a</label>
-      <div class="pw-wrap">
-        <input type="password" id="loginPass" placeholder="Ingresa tu contrase&ntilde;a" autocomplete="current-password" />
-        <button class="pw-toggle" type="button" onclick="togglePw()" id="pwEye">&#128065;</button>
-      </div>
-    </div>
-    <button class="login-btn" onclick="doLogin()">Ingresar</button>
-    <div class="login-footer">Informaci&oacute;n confidencial &middot; Solo personal autorizado</div>
-  </div>
-</div>
 
 <!-- MODAL DETALLE SUCURSAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="overlayClick(event)">
@@ -286,7 +242,6 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- APP -->
 <div id="appWrap">
   <div class="hdr">
     <div>
@@ -303,7 +258,6 @@ tr:last-child td{border-bottom:none}
                onfocus="if(this.value.length>=2)doSearch(this.value)" autocomplete="off" />
         <div class="search-results" id="searchResults"></div>
       </div>
-      <button class="logout-btn" onclick="doLogout()">Cerrar sesi&oacute;n</button>
     </div>
   </div>
 
@@ -371,48 +325,7 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-// ─────────────────────────────────────────
-//  AUTH
-// ─────────────────────────────────────────
-const USERS=window.AUTH_USERS||[];
-function doLogin(){
-  const u=document.getElementById('loginUser').value.trim();
-  const p=document.getElementById('loginPass').value;
-  if(USERS.some(c=>c.user===u&&c.pass===p)){
-    sessionStorage.setItem('et_auth','1');
-    document.getElementById('loginWrap').style.display='none';
-    document.getElementById('appWrap').style.display='block';
-    initDashboard();
-  } else {
-    const err=document.getElementById('loginErr');
-    err.style.display='block';
-    document.getElementById('loginPass').value='';
-    document.getElementById('loginPass').focus();
-    setTimeout(()=>err.style.display='none',3000);
-  }
-}
-function doLogout(){
-  sessionStorage.removeItem('et_auth');
-  document.getElementById('appWrap').style.display='none';
-  document.getElementById('loginWrap').style.display='flex';
-  document.getElementById('loginUser').value='';
-  document.getElementById('loginPass').value='';
-}
-function togglePw(){
-  const inp=document.getElementById('loginPass'),eye=document.getElementById('pwEye');
-  if(inp.type==='password'){inp.type='text';eye.innerHTML='&#128584;';}
-  else{inp.type='password';eye.innerHTML='&#128065;';}
-}
-document.addEventListener('DOMContentLoaded',function(){
-  ['loginUser','loginPass'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();}));
-  if(sessionStorage.getItem('et_auth')==='1'){
-    document.getElementById('loginWrap').style.display='none';
-    document.getElementById('appWrap').style.display='block';
-    initDashboard();
-  } else {
-    setTimeout(()=>document.getElementById('loginUser').focus(),100);
-  }
-});
+document.addEventListener('DOMContentLoaded', initDashboard);
 
 // ─────────────────────────────────────────
 //  CONFIG
