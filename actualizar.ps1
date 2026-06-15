@@ -134,6 +134,16 @@ try {
     $content = "// Auto-generado $ts - $cnt pacientes`nwindow.DASHBOARD_DATA = $json;`nwindow.DASHBOARD_FILE = 'GOOGLE DASH.xlsx';`nwindow.DASHBOARD_TS = '$ts';`nwindow.DASHBOARD_CNT = $cnt;$extraLines"
 
     [System.IO.File]::WriteAllText($OutputFile, $content, [System.Text.Encoding]::UTF8)
+
+    # Actualizar cache-busting de data.js en el dashboard HTML
+    $htmlFile = Join-Path $PSScriptRoot 'dashboard_google.html'
+    if (Test-Path $htmlFile) {
+        $version = Get-Date -Format 'yyyyMMddHHmmss'
+        $html = [System.IO.File]::ReadAllText($htmlFile)
+        $html = $html -replace 'data\.js(\?v=\d+)?', "data.js?v=$version"
+        [System.IO.File]::WriteAllText($htmlFile, $html, [System.Text.Encoding]::UTF8)
+    }
+
     Write-Host "OK: $cnt pacientes - PP Mayo: $ppMayo / Jun: $ppJunio - Leads Mayo: $leadsMayo / Jun: $leadsJunio - $ts"
 
 } finally {
